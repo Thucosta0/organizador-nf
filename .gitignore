@@ -1,0 +1,61 @@
+# Arquivos e pastas específicos do Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Arquivos de log
+*.log
+
+# Arquivos específicos do PyInstaller
+*.manifest
+*.spec
+
+# Arquivos específicos do Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Arquivos específicos do macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Arquivos específicos do IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Exceções para manter o executável no repositório
+!release/OrganizadorNF.exe 

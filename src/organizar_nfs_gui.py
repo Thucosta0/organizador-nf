@@ -50,6 +50,28 @@ def criar_pasta_destino(pasta_base: str) -> str:
     
     return caminho_pasta
 
+def criar_pasta_lote(pasta_base: str, numero_lote: int) -> str:
+    """
+    Cria uma pasta de lote dentro da pasta de destino.
+    
+    Args:
+        pasta_base (str): Pasta base onde a pasta de destino será criada
+        numero_lote (int): Número do lote para criar a pasta
+        
+    Returns:
+        str: Caminho da pasta criada
+    """
+    # Criar o nome da pasta
+    nome_pasta = f"Lote {numero_lote:03d}"
+    caminho_pasta = os.path.join(pasta_base, nome_pasta)
+    
+    # Criar a pasta se não existir
+    if not os.path.exists(caminho_pasta):
+        os.makedirs(caminho_pasta)
+        logging.info(f"Pasta de lote {caminho_pasta} criada com sucesso.")
+    
+    return caminho_pasta
+
 def encontrar_arquivos_nf(diretorio: str) -> List[str]:
     """
     Encontra arquivos de notas fiscais no diretório especificado.
@@ -329,6 +351,12 @@ class OrganizadorNFApp:
             # Criar a pasta de destino
             self.pasta_destino_final = criar_pasta_destino(self.pasta_destino)
             
+            # Configurar variáveis para controle de lotes
+            arquivos_por_lote = 50
+            numero_lote = 1
+            pasta_lote_atual = criar_pasta_lote(self.pasta_destino_final, numero_lote)
+            contador_lote = 0
+            
             self.info_label.config(text=f"Status: Movendo arquivos para {self.pasta_destino_final}...")
             self.root.update()
             
@@ -340,11 +368,19 @@ class OrganizadorNFApp:
             contador = 0
             for i, arquivo in enumerate(self.arquivos_nf):
                 try:
+                    # Verificar se precisa criar uma nova pasta de lote
+                    if contador_lote >= arquivos_por_lote:
+                        numero_lote += 1
+                        pasta_lote_atual = criar_pasta_lote(self.pasta_destino_final, numero_lote)
+                        contador_lote = 0
+                        logging.info(f"Criando novo lote: {pasta_lote_atual}")
+                    
                     nome_arquivo = os.path.basename(arquivo)
-                    destino = os.path.join(self.pasta_destino_final, nome_arquivo)
+                    destino = os.path.join(pasta_lote_atual, nome_arquivo)
                     shutil.move(arquivo, destino)
-                    logging.info(f"Arquivo {nome_arquivo} movido para {self.pasta_destino_final}")
+                    logging.info(f"Arquivo {nome_arquivo} movido para {pasta_lote_atual}")
                     contador += 1
+                    contador_lote += 1
                     
                     # Atualizar a barra de progresso
                     self.progress["value"] = i + 1
@@ -355,9 +391,10 @@ class OrganizadorNFApp:
             
             # Mostrar mensagem de conclusão
             if contador > 0:
-                mensagem = f"Operação concluída com sucesso!\n\n{contador} arquivos foram movidos para:\n{self.pasta_destino_final}"
+                lotes_criados = numero_lote
+                mensagem = f"Operação concluída com sucesso!\n\n{contador} arquivos foram movidos para:\n{self.pasta_destino_final}\n\nArquivos organizados em {lotes_criados} lotes de até {arquivos_por_lote} arquivos."
                 self.info_label.config(text=f"Status: {mensagem}")
-                logging.info(f"Organização concluída. {contador} arquivos movidos.")
+                logging.info(f"Organização concluída. {contador} arquivos movidos em {lotes_criados} lotes.")
                 messagebox.showinfo("Sucesso", mensagem)
                 
                 # Atualizar a lista de arquivos após mover
